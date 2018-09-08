@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
   int socket_descriptor, client_socket, read_size;
-  struct sockaddr_in server, client;
+  struct sockaddr_in server;
   char client_message[2000];
 
   // Create socket
