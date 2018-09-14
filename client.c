@@ -6,6 +6,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "http11.h"
+#include "util.h"
+
 #define PORT 80
 
 int domain_to_in_addr(char* domain, struct in_addr* address)
@@ -49,8 +52,9 @@ int main() {
 
     struct sockaddr_in address;
 
-    char *hello = "GET / HTTP/1.0\r\n\r\n";
+    char *hello = "GET / HTTP/1.1\r\n\r\n";
     char buffer[1024] = {0};
+    char in_buffer[50000] = {0};
 
     if((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -61,7 +65,7 @@ int main() {
     address.sin_family = AF_INET;
     address.sin_port = htons(PORT);
 
-    int res = domain_to_in_addr("www.google.com", &address.sin_addr);
+    int res = domain_to_in_addr("www.yelp.com", &address.sin_addr);
 
     if(res < 0) {
         return(-1);
@@ -86,7 +90,14 @@ int main() {
         count = read(sock_fd, buffer, 1020);
         buffer[count] = '\0';
 
-        printf("%s\n", buffer);
+        append_to_string(in_buffer, buffer);
+
+        // printf("%s\n", buffer);
+        // printf("In buffer:");
+        // printf("\n\n%s\n\n\n", in_buffer);
+        // printf("DONE\n\n");
+
+        process_headers(in_buffer);
 
         if (count < 0)
             printf("ERROR reading response from socket");
